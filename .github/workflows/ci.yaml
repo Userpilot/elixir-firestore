@@ -1,0 +1,40 @@
+name: CI Flows
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  compile:
+    name: Build Source
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v3
+      
+    - uses: erlef/setup-beam@v1
+      with:
+        otp-version: "25"
+        elixir-version: "1.13.4"
+
+    - name: Cache Hex
+      id: cache-hex
+      uses: actions/cache@v3
+      with:
+        path: |
+            ./deps
+            ~/.hex
+        key: ${{ runner.os }}-mix-deps-${{ hashFiles('mix.lock', '**/mix.exs') }}
+        restore-keys: ${{ runner.os }}-mix-
+        
+    - name: Compile
+      run: mix do deps.get, deps.compile, compile
+
+    - name: Cache build
+      uses: actions/cache@v3
+      with:
+        path: |
+          ./_build
+        key: ${{ runner.os }}-mix-build-${{ github.run_number }}
