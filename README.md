@@ -32,15 +32,16 @@ defmodule MyApp.Firestore.Repo do
 end
 ```
 
-  Options:
-  `:tesla_adapter`: This application uses Tesla HTTP client, which supports multiple
+  **Options**:
+  
+  * `:tesla_adapter`: This application uses Tesla HTTP client, which supports multiple
   ![adapters](https://github.com/elixir-tesla/tesla#adapters) to process requests.
 
-  `:pool_size`: If the adapter supports pooling, you can tune its size depending on expected
+  * `:pool_size`: If the adapter supports pooling, you can tune its size depending on expected
   throughput. Note that pooling is only supported for `Tesla.Adapter.Hackney`
   and `Tesla.Adapter.IBrowse` adapters.
 
-  `:read_only`: If true, it will not include any write operation related functions in the module.
+  * `:read_only`: If true, it will not include any write operation related functions in the module.
 
   Then, add the appropriate Google Service Account credentials in your config file:
 ```elixir
