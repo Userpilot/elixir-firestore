@@ -26,7 +26,7 @@ Include the `Firestore.Repo` module in your application, you can put the use mac
 defmodule MyApp.Firestore.Repo do
   use Firestore.Repo,
     otp_app: :my_app,
-    tesla_adapter: Tesla.Adapter.Hackney,
+    tesla_adapter: :hackney,
     pool_size: 50,
     read_only: false
 end
@@ -35,13 +35,13 @@ end
   **Options**:
   
   * `:tesla_adapter`: This application uses Tesla HTTP client, which supports multiple
-  ![adapters](https://github.com/elixir-tesla/tesla#adapters) to process requests.
+  ![adapters](https://github.com/elixir-tesla/tesla#adapters) to process requests. Use one of the
+  following supported values `[:httpc, :hackney, :ibrowse, :gun, :mint, :finch]`
 
   * `:pool_size`: If the adapter supports pooling, you can tune its size depending on expected
-  throughput. Note that pooling is only supported for `Tesla.Adapter.Hackney`
-  and `Tesla.Adapter.IBrowse` adapters.
+  throughput. Note that configurable pool sizing is only supported for `:hackney` and `:ibrowse` HTTP adapters.
 
-  * `:read_only`: If true, it will not include any write operation related functions in the module.
+  * `:read_only`: If `true`, it will not include any write operation related functions in the module.
 
   Then, add the appropriate Google Service Account credentials in your config file:
 ```elixir

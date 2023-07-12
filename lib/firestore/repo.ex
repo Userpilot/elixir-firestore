@@ -11,7 +11,7 @@ defmodule Firestore.Repo do
       defmodule MyApp.Firestore.Repo do
         use Firestore.Repo,
           otp_app: :my_app,
-          tesla_adapter: Tesla.Adapter.Hackney,
+          tesla_adapter: :hackney,
           pool_size: 50,
           read_only: false
       end
@@ -21,8 +21,7 @@ defmodule Firestore.Repo do
   ![adapters](https://github.com/elixir-tesla/tesla#adapters) to process requests.
 
   `:pool_size`: If the adapter supports pooling, you can tune its size depending on expected
-  throughput. Note that pooling is only supported for `Tesla.Adapter.Hackney`
-  and `Tesla.Adapter.IBrowse` adapters.
+  throughput. Note that configurable pool sizing is only supported for `:hackney` and `:ibrowse` HTTP adapters.
 
   `:read_only`: If true, it will not include any write operation related functions in the module.
 
@@ -71,15 +70,19 @@ defmodule Firestore.Repo do
   """
   @callback update(String.t(), map(), Keyword.t()) :: {:ok, map()} | {:error, term()}
 
+  @supported_adapters [:httpc, :hackney, :ibrowse, :gun, :mint, :finch]
+
   @doc false
   defmacro __using__(opts) do
+    Enum.each(opts, &validate_option/1)
+
     quote bind_quoted: [opts: opts] do
       @behaviour Firestore.Repo
 
       @otp_app opts[:otp_app]
-      @tesla_adapter opts[:tesla_adapter] || Tesla.Adapter.Hackney
-      @pool_size opts[:pool_size] || 50
-      @read_only opts[:read_only] || false
+      @tesla_adapter opts[:tesla_adapter]
+      @pool_size opts[:pool_size]
+      @read_only opts[:read_only]
 
       def config() do
         @otp_app
@@ -135,4 +138,23 @@ defmodule Firestore.Repo do
       end
     end
   end
+
+  defp validate_option({:otp_app, app}) when not is_atom(app),
+    do: raise(ArgumentError, "otp_app must be an atom, got #{inspect(app)}")
+
+  defp validate_option({:tesla_adapter, adapter}) when adapter not in @supported_adapters,
+    do:
+      raise(
+        ArgumentError,
+        "tesla_adapter must be one of #{inspect(@supported_adapters)}, got #{inspect(adapter)}"
+      )
+
+  defp validate_option({:pool_size, size}) when not is_integer(size),
+    do: raise(ArgumentError, "pool_size must be an integer, got #{inspect(size)}")
+
+  defp validate_option({:read_only, read_only}) when not is_boolean(read_only),
+    do: raise(ArgumentError, "read_only must be a boolean, got #{inspect(read_only)}")
+
+  defp validate_option(_option),
+    do: :ok
 end

@@ -5,13 +5,11 @@ defmodule Firestore do
 
   use GenServer
 
-  ## TODO: Implement connection pooling for applicable adapters
-
   def init(opts) do
     credentials = Enum.into(opts, %{}, fn {k, v} -> {to_string(k), v} end)
 
     with {:ok, %{token: token}} <- Goth.Token.fetch(source: {:service_account, credentials}) do
-      client = Firestore.Connection.client(token)
+      client = Firestore.Connection.client(token, opts)
 
       :ets.new(:firestore_conn_table, [:set, :public, :named_table])
       :ets.insert(:firestore_conn_table, {:"#{opts[:otp_app]}_firestore_client", client})

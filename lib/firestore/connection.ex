@@ -5,7 +5,14 @@ defmodule Firestore.Connection do
 
   @type t :: Tesla.Env.client()
 
-  @default_adapter {Tesla.Adapter.Hackney, []}
+  @http_adapters [
+    httpc: nil,
+    hackney: Tesla.Adapter.Hackney,
+    ibrowse: Tesla.Adapter.IBrowse,
+    gun: Tesla.Adapter.Gun,
+    mint: Tesla.Adapter.Mint,
+    finch: Tesla.Adapter.Finch
+  ]
 
   use GoogleApi.Gax.Connection,
     scopes: [
@@ -18,10 +25,13 @@ defmodule Firestore.Connection do
     otp_app: :google_api_firestore,
     base_url: "https://firestore.googleapis.com/"
 
-  @spec client(String.t(), Module.t()) :: Tesla.Client.t()
-  def client(token, adapter \\ @default_adapter) when is_binary(token) do
+  ## TODO: Implement connection pooling for applicable adapters
+
+  @spec client(String.t(), Keyword.t()) :: Tesla.Client.t()
+  def client(token, opts) when is_binary(token) do
+    http_adapter = @http_adapters[opts[:tesla_adapter]]
     middleware = [{Tesla.Middleware.Headers, [{"authorization", "Bearer #{token}"}]}]
 
-    Tesla.client(middleware, adapter)
+    Tesla.client(middleware, {http_adapter, []})
   end
 end
