@@ -1,4 +1,14 @@
 # Elixir Firestore Wrapper
+An abstraction over Google's Firestore API for convenience and configurability, providing you with the following capabilities:
+* Defining Firestore database configs, which can be specific to each OTP application in an Elixir umbrella project.
+* A configurable `Repo` module that can be used to conveniently run Firestore queries.
+* Setting an HTTP adapter of your choice to be used in `Tesla`'s client.
+* Configuring connection pool sizes for applicable HTTP adapters.
+* Support for encoding/decoding between Google's Firestore API and Elixir native types.
+
+TODO:
+* Support Firestore structured query semantics.
+* Connection pool initialization.
 
 ## Installation
 
