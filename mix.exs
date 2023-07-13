@@ -49,7 +49,6 @@ defmodule Firestore.MixProject do
       {:ibrowse, "~> 4.2"},
       {:idna, "~> 6.0"},
       {:castore, "~> 0.1"},
-      {:jason, "~> 1.2.0"},
       {:credo, "~> 1.6", only: :dev, runtime: false},
       {:dialyxir, "~> 1.0", only: :dev, runtime: false},
       {:git_hooks, "~> 0.7.0", only: :dev, runtime: false}
