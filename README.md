@@ -40,6 +40,8 @@ end
 
   * `:pool_size`: If the adapter supports pooling, you can tune its size depending on expected
   throughput. Note that configurable pool sizing is only supported for `:hackney` and `:ibrowse` HTTP adapters.
+  Note that pooling is only supported for `:hackney` and `:ibrowse` HTTP adapters. You can set this to `nil` 
+  to disable it, or if the adapter has no support for configurability.
 
   * `:read_only`: If `true`, it will not include any write operation related functions in the module.
 

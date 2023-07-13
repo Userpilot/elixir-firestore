@@ -21,7 +21,8 @@ defmodule Firestore.Repo do
   ![adapters](https://github.com/elixir-tesla/tesla#adapters) to process requests.
 
   `:pool_size`: If the adapter supports pooling, you can tune its size depending on expected
-  throughput. Note that configurable pool sizing is only supported for `:hackney` and `:ibrowse` HTTP adapters.
+  throughput. Note that pooling is only supported for `:hackney` and `:ibrowse` HTTP adapters.
+  You can set this to `nil` to disable it, or if the adapter has no support for configurability.
 
   `:read_only`: If true, it will not include any write operation related functions in the module.
 
@@ -53,7 +54,7 @@ defmodule Firestore.Repo do
   @doc """
   Returns the Firestore configuration stored in the `:otp_app` environment.
   """
-  @callback config() :: Keyword.t()
+  @callback config() :: map()
 
   @doc """
   Returns a single document for a given collection path. Returns `nil` if no result was found.
@@ -88,6 +89,7 @@ defmodule Firestore.Repo do
         @otp_app
         |> Application.get_env(__MODULE__, [])
         |> Keyword.merge(otp_app: @otp_app, tesla_adapter: @tesla_adapter, pool_size: @pool_size)
+        |> Map.new()
       end
 
       def get(path, opts \\ []) do
@@ -149,8 +151,8 @@ defmodule Firestore.Repo do
         "tesla_adapter must be one of #{inspect(@supported_adapters)}, got #{inspect(adapter)}"
       )
 
-  defp validate_option({:pool_size, size}) when not is_integer(size),
-    do: raise(ArgumentError, "pool_size must be an integer, got #{inspect(size)}")
+  defp validate_option({:pool_size, size}) when not is_integer(size) and not is_nil(size),
+    do: raise(ArgumentError, "pool_size must be an integer or nil, got #{inspect(size)}")
 
   defp validate_option({:read_only, read_only}) when not is_boolean(read_only),
     do: raise(ArgumentError, "read_only must be a boolean, got #{inspect(read_only)}")

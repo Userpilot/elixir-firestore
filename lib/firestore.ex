@@ -5,14 +5,14 @@ defmodule Firestore do
 
   use GenServer
 
-  def init(opts) do
-    credentials = Enum.into(opts, %{}, fn {k, v} -> {to_string(k), v} end)
+  def init(%{otp_app: app} = config) do
+    credentials = Enum.into(config, %{}, fn {k, v} -> {to_string(k), v} end)
 
     with {:ok, %{token: token}} <- Goth.Token.fetch(source: {:service_account, credentials}) do
-      client = Firestore.Connection.client(token, opts)
+      client = Firestore.Connection.init(token, config)
 
       :ets.new(:firestore_conn_table, [:set, :public, :named_table])
-      :ets.insert(:firestore_conn_table, {:"#{opts[:otp_app]}_firestore_client", client})
+      :ets.insert(:firestore_conn_table, {:"#{app}_firestore_client", client})
       {:ok, client}
     end
   end
