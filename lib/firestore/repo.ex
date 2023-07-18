@@ -115,7 +115,12 @@ defmodule Firestore.Repo do
 
         def update(document_path, payload, opts \\ []) do
           with {:ok, client} <- get_client(),
-               {:ok, response} <- Firestore.API.update_document(client, document_path, opts) do
+               {:ok, response} <-
+                 Firestore.API.update_document(
+                   client,
+                   document_path,
+                   Keyword.put([], :body, Firestore.Encoder.encode(payload))
+                 ) do
             Firestore.Decoder.decode(response)
           end
         end
