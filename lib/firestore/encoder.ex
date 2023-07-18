@@ -4,10 +4,10 @@ defprotocol Firestore.Encoder do
   def encode(payload)
 end
 
-defimpl Firestore.Encoder, for: GoogleApi.Firestore.V1.Model.Document do
+defimpl Firestore.Encoder, for: Map do
   alias GoogleApi.Firestore.V1.Model.{Document, Value, ArrayValue, MapValue}
 
-  def encode(map) when is_map(map), do: %Document{fields: Enum.into(map, %{}, &encode_field/1)}
+  def encode(map), do: %Document{fields: Enum.into(map, %{}, &encode_field/1)}
 
   @spec encode_field({term, term} | term) :: {term, Value.t()} | Value.t()
   def encode_field({:__firestore_bytes, val}), do: %Value{bytesValue: val}

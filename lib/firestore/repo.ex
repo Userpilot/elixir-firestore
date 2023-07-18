@@ -107,7 +107,7 @@ defmodule Firestore.Repo do
                    client,
                    parent,
                    collection_id,
-                   Keyword.put(opts, :body, Firestore.Encoder.encode(payload))
+                   Keyword.put(opts, :body, payload)
                  ) do
             Firestore.Decoder.decode(response)
           end
