@@ -32,7 +32,7 @@ end
 defimpl Firestore.Decoder, for: GoogleApi.Firestore.V1.Model.Document do
   alias GoogleApi.Firestore.V1.Model.Value
 
-  def decode(%{fields: fields}), do: Enum.into(fields, %{}, &decode_field/1)
+  def decode(%{fields: fields}), do: {:ok, Enum.into(fields, %{}, &decode_field/1)}
 
   defp decode_field({key, value}), do: {key, decode_field(value)}
 
@@ -54,5 +54,5 @@ defimpl Firestore.Decoder, for: GoogleApi.Firestore.V1.Model.Document do
 end
 
 defimpl Firestore.Decoder, for: Any do
-  def decode(response), do: response
+  def decode(response), do: {:ok, response}
 end

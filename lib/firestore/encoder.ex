@@ -5,7 +5,7 @@ defprotocol Firestore.Encoder do
 end
 
 defimpl Firestore.Encoder, for: Map do
-  alias GoogleApi.Firestore.V1.Model.{Document, Value, ArrayValue, MapValue}
+  alias GoogleApi.Firestore.V1.Model.Document
 
   def encode(map), do: %Document{fields: Enum.into(map, %{}, &encode_field/1)}
 
