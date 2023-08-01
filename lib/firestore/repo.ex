@@ -105,7 +105,7 @@ defmodule Firestore.Repo do
                {:ok, response} <-
                  Firestore.API.create_document(
                    client,
-                   parent,
+                   build_path(parent),
                    collection_id,
                    Keyword.put(opts, :body, Firestore.Encoder.encode(payload))
                  ) do
@@ -118,7 +118,7 @@ defmodule Firestore.Repo do
                {:ok, response} <-
                  Firestore.API.update_document(
                    client,
-                   document_path,
+                   build_path(document_path),
                    Keyword.put([], :body, Firestore.Encoder.encode(payload))
                  ) do
             Firestore.Decoder.decode(response)
