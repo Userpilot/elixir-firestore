@@ -119,12 +119,17 @@ defmodule Firestore.Repo do
                  Firestore.API.update_document(
                    client,
                    build_path(document_path),
-                   Keyword.put([], :body, Firestore.Encoder.encode(payload))
+                   Keyword.put([], :body, Firestore.Encoder.encode(payload)) |> should_mask?(opts)
                  ) do
             Firestore.Decoder.decode(response)
           end
         end
       end
+
+      defp should_mask?(keyword, opts) when Enum.empty?(opts), do: keyword
+
+      defp should_mask?(keyword, opts),
+        do: Keyword.put(keyword, :"updateMask.fieldPaths", opts[:fields])
 
       defp get_client() do
         case :ets.lookup(:firestore_table, :"#{@otp_app}_firestore_client") do
