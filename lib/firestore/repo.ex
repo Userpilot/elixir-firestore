@@ -126,7 +126,7 @@ defmodule Firestore.Repo do
         end
       end
 
-      defp should_mask?(keyword, opts) when Enum.empty?(opts), do: keyword
+      defp should_mask?(keyword, opts) when opts == [], do: keyword
 
       defp should_mask?(keyword, opts),
         do: Keyword.put(keyword, :"updateMask.fieldPaths", opts[:fields])
