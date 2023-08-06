@@ -127,7 +127,7 @@ defmodule Firestore.Repo do
       end
 
       defp get_client() do
-        case :ets.lookup(:firestore_conn_table, :"#{@otp_app}_firestore_client") do
+        case :ets.lookup(:firestore_table, :"#{@otp_app}_firestore_client") do
           [{_, %Tesla.Client{} = client}] ->
             {:ok, client}
 
