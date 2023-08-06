@@ -21,7 +21,7 @@ defmodule Firestore do
   alias Goth.Token
 
   @ets_table :firestore_table
-  @refresh_token_interval_ms 1 * 60 * 1000
+  @refresh_token_interval_ms 45 * 60 * 1000
 
   @impl true
   def init(config) do
