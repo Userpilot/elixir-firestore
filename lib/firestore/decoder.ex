@@ -39,8 +39,14 @@ defimpl Firestore.Decoder, for: GoogleApi.Firestore.V1.Model.Document do
   defp decode_field(%Value{arrayValue: %{values: list}}) when is_list(list),
     do: Enum.map(list, &decode_field/1)
 
+  defp decode_field(%Value{arrayValue: %{values: list}}) when is_nil(list),
+    do: []
+
   defp decode_field(%Value{mapValue: %{fields: map}}) when is_map(map),
     do: Enum.into(map, %{}, &decode_field/1)
+
+  defp decode_field(%Value{mapValue: %{fields: map}}) when is_nil(map),
+    do: %{}
 
   defp decode_field(%Value{booleanValue: value}) when not is_nil(value), do: value
   defp decode_field(%Value{bytesValue: value}) when not is_nil(value), do: value
