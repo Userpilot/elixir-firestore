@@ -84,11 +84,13 @@ defmodule Firestore.Repo do
       @tesla_adapter opts[:tesla_adapter]
       @pool_size opts[:pool_size]
       @read_only opts[:read_only]
+      #Used for Finch tesla adapter
+      @name opts[:name]
 
       def config() do
         @otp_app
         |> Application.get_env(__MODULE__, [])
-        |> Keyword.merge(otp_app: @otp_app, tesla_adapter: @tesla_adapter, pool_size: @pool_size)
+        |> Keyword.merge(otp_app: @otp_app, tesla_adapter: @tesla_adapter, pool_size: @pool_size, name: @name)
         |> Map.new()
       end
 
