@@ -34,6 +34,9 @@ defmodule Firestore.Connection do
     Tesla.client(middleware, http_adapter)
   end
 
+  defp build_http_adapter(%{otp_app: _, tesla_adapter: :finch,name: name}),
+    do: {@http_adapters[:finch], [name: name]}
+
   defp build_http_adapter(%{otp_app: _, tesla_adapter: adapter, pool_size: nil}),
     do: {@http_adapters[adapter], []}
 
@@ -44,6 +47,7 @@ defmodule Firestore.Connection do
 
   defp build_http_adapter(%{otp_app: _, tesla_adapter: :ibrowse, pool_size: pool_size}),
     do: {@http_adapters[:ibrowse], [max_sessions: pool_size, max_pipeline_size: 1]}
+
 
   defp build_http_adapter(%{tesla_adapter: adapter} = config) do
     Logger.warning("Ignoring pool_size option as #{adapter} does not support it")
