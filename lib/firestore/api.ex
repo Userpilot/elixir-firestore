@@ -5,6 +5,10 @@ defmodule Firestore.API do
     to: Projects,
     as: :firestore_projects_databases_documents_get
 
+  defdelegate batch_get_documents(conn, path, params \\ [], opts \\ []),
+    to: Projects,
+    as: :firestore_projects_databases_documents_batch_get
+
   defdelegate create_document(conn, parent, collection_id, params \\ [], opts \\ []),
     to: Projects,
     as: :firestore_projects_databases_documents_create_document
