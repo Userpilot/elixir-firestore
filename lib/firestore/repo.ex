@@ -48,7 +48,6 @@ defmodule Firestore.Repo do
         # ...
       ]
   """
-  require Logger
 
   @type t() :: module()
 
@@ -84,8 +83,6 @@ defmodule Firestore.Repo do
     Enum.each(opts, &validate_option/1)
 
     quote bind_quoted: [opts: opts] do
-      require Logger
-
       @behaviour Firestore.Repo
 
       @otp_app opts[:otp_app]
@@ -115,26 +112,15 @@ defmodule Firestore.Repo do
         end
       end
 
-      def batch_get_documents(document_paths, params \\ []) do
-        payload = %{documents: Enum.map(document_paths, &build_document_path/1)}
-        params = Keyword.put(params, :body, payload)
+      def batch_get_documents(document_paths, params \\ %{}) do
+        params =
+          params
+          |> Map.put(:documents, Enum.map(document_paths, &build_document_path/1))
+          |> then(fn params -> Keyword.put([], :body, params) end)
 
         with {:ok, client} <- get_client(),
              {:ok, response} <- Firestore.API.batch_get_documents(client, db_path(), params) do
-          response
-          |> Enum.filter(fn
-            %{missing: nil} ->
-              true
-
-            %{missing: missing} ->
-              Logger.warning("Missing document path: #{inspect(missing)}")
-              false
-
-            other ->
-              Logger.warning("Unknown response: #{inspect(other)}")
-          end)
-          |> Enum.map(fn %{found: document} -> Firestore.Decoder.decode(document) end)
-          |> Enum.map(fn {:ok, document} -> document end)
+          Firestore.Decoder.decode(response)
         end
       end
 
@@ -158,7 +144,8 @@ defmodule Firestore.Repo do
                  Firestore.API.update_document(
                    client,
                    build_document_path(document_path),
-                   Keyword.put([], :body, Firestore.Encoder.encode(payload)) |> should_mask?(params)
+                   Keyword.put([], :body, Firestore.Encoder.encode(payload))
+                   |> should_mask?(params)
                  ) do
             Firestore.Decoder.decode(response)
           end

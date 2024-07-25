@@ -22,6 +22,17 @@ defimpl Firestore.Decoder, for: GoogleApi.Firestore.V1.Model.Empty do
   def decode(_response), do: {:ok, []}
 end
 
+defimpl Firestore.Decoder, for: GoogleApi.Firestore.V1.Model.BatchGetDocumentsResponse do
+  def decode(%{found: document, missing: nil}) do
+    {:ok, decoded_document} = Firestore.Decoder.decode(document)
+    %{path: document.name, document: decoded_document}
+  end
+
+  def decode(%{found: nil, missing: missing}) do
+    %{path: missing, document: nil}
+  end
+end
+
 defimpl Firestore.Decoder, for: GoogleApi.Firestore.V1.Model.ListDocumentsResponse do
   def decode(%{documents: docs, nextPageToken: next}) do
     response = %{documents: Enum.map(docs, &decode/1), nextPageToken: next}
