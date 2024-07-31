@@ -64,7 +64,7 @@ defmodule Firestore.Repo do
   @doc """
   Returns a map of documents for given document paths. Returns `nil` if no result was found.
   """
-  @callback batch_get_documents([String.t()], Keyword.t()) :: {:ok, map()} | {:error, term()}
+  @callback batch_get_documents([String.t()], map()) :: {:ok, map()} | {:error, term()}
 
   @doc """
   Creates a document in a collection given a path.
