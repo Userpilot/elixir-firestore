@@ -11,7 +11,7 @@ defmodule Firestore do
 
     @type t :: %__MODULE__{
             config: map(),
-            client: Connection.t()
+            client: Firestore.Connection.t()
           }
   end
 

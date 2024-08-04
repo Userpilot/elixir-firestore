@@ -62,6 +62,11 @@ defmodule Firestore.Repo do
   @callback get(String.t(), Keyword.t()) :: {:ok, map()} | {:error, term()}
 
   @doc """
+  Returns a map of documents for given document paths. Returns `nil` if no result was found.
+  """
+  @callback batch_get_documents([String.t()], map()) :: {:ok, map()} | {:error, term()}
+
+  @doc """
   Creates a document in a collection given a path.
   """
   @callback insert(String.t(), String.t(), map(), Keyword.t()) :: {:ok, map()} | {:error, term()}
@@ -84,54 +89,73 @@ defmodule Firestore.Repo do
       @tesla_adapter opts[:tesla_adapter]
       @pool_size opts[:pool_size]
       @read_only opts[:read_only]
-      #Used for Finch tesla adapter
+      # Used for Finch tesla adapter
       @name opts[:name]
 
       def config() do
         @otp_app
         |> Application.get_env(__MODULE__, [])
-        |> Keyword.merge(otp_app: @otp_app, tesla_adapter: @tesla_adapter, pool_size: @pool_size, name: @name)
+        |> Keyword.merge(
+          otp_app: @otp_app,
+          tesla_adapter: @tesla_adapter,
+          pool_size: @pool_size,
+          name: @name
+        )
         |> Map.new()
       end
 
-      def get(path, opts \\ []) do
+      def get(path, params \\ []) do
         with {:ok, client} <- get_client(),
-             {:ok, response} <- Firestore.API.get_document(client, build_path(path), opts) do
+             {:ok, response} <-
+               Firestore.API.get_document(client, build_document_path(path), params) do
+          Firestore.Decoder.decode(response)
+        end
+      end
+
+      def batch_get_documents(document_paths, params \\ %{}) do
+        params =
+          params
+          |> Map.put(:documents, Enum.map(document_paths, &build_document_path/1))
+          |> then(fn params -> Keyword.put([], :body, params) end)
+
+        with {:ok, client} <- get_client(),
+             {:ok, response} <- Firestore.API.batch_get_documents(client, db_path(), params) do
           Firestore.Decoder.decode(response)
         end
       end
 
       unless @read_only do
-        def insert(collection_id, parent, payload, opts \\ []) do
+        def insert(collection_id, parent, payload, params \\ []) do
           with {:ok, client} <- get_client(),
                {:ok, response} <-
                  Firestore.API.create_document(
                    client,
-                   build_path(parent),
+                   build_document_path(parent),
                    collection_id,
-                   Keyword.put(opts, :body, Firestore.Encoder.encode(payload))
+                   Keyword.put(params, :body, Firestore.Encoder.encode(payload))
                  ) do
             Firestore.Decoder.decode(response)
           end
         end
 
-        def update(document_path, payload, opts \\ []) do
+        def update(document_path, payload, params \\ []) do
           with {:ok, client} <- get_client(),
                {:ok, response} <-
                  Firestore.API.update_document(
                    client,
-                   build_path(document_path),
-                   Keyword.put([], :body, Firestore.Encoder.encode(payload)) |> should_mask?(opts)
+                   build_document_path(document_path),
+                   Keyword.put([], :body, Firestore.Encoder.encode(payload))
+                   |> should_mask?(params)
                  ) do
             Firestore.Decoder.decode(response)
           end
         end
       end
 
-      defp should_mask?(keyword, opts) when opts == [], do: keyword
+      defp should_mask?(keyword, params) when params == [], do: keyword
 
-      defp should_mask?(keyword, opts),
-        do: Keyword.put(keyword, :"updateMask.fieldPaths", opts[:fields])
+      defp should_mask?(keyword, params),
+        do: Keyword.put(keyword, :"updateMask.fieldPaths", params[:fields])
 
       defp get_client() do
         case :ets.lookup(:firestore_table, :"#{@otp_app}_firestore_client") do
@@ -144,12 +168,13 @@ defmodule Firestore.Repo do
         end
       end
 
-      defp build_path(path) do
+      defp db_path() do
         @otp_app
         |> Application.get_env(__MODULE__, [])
         |> Keyword.get(:url)
-        |> then(fn db_url -> "#{db_url}/#{path}" end)
       end
+
+      defp build_document_path(path), do: "#{db_path()}/documents/#{path}"
     end
   end
 
