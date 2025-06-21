@@ -39,11 +39,11 @@ defmodule Firestore.MixProject do
   defp deps do
     [
       {:google_api_firestore, "~> 0.22"},
-      {:cowlib, "~> 2.6"},
-      {:goth, "~> 1.4.3"},
-      {:tesla, "~> 1.4.0"},
+      {:cowlib, "~> 2.11"},
+      {:goth, "~> 1.4"},
+      {:tesla, "~> 1.9"},
       {:hackney, "~> 1.10"},
-      {:gun, "~> 1.3"},
+      {:gun, "~> 2.0"},
       {:mint, "~> 1.0"},
       {:finch, "~> 0.17"},
       {:ibrowse, "~> 4.2"},
